@@ -23,7 +23,6 @@ static void adc_init() {
     hadc1.Init.ScanConvMode = DISABLE;
     hadc1.Init.ContinuousConvMode = DISABLE;
     hadc1.Init.DiscontinuousConvMode = DISABLE;
-    hadc1.Init.NbrOfDiscConversion = 0;
     hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
     hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
@@ -78,9 +77,10 @@ int main() {
         led = !led;
         float t = read_temp_c();
         temps[i] = t; sum += t;
-        printf("T%d,%.2f\r\n", i+1, t); fflush(stdout);
+        int tempInt = (int)roundf(t);
+        printf("T%d,%d\r\n", i+1, tempInt); fflush(stdout);
         char msg[48];
-        sprintf(msg, "Reading %d/10: %.2f C", i+1, t);
+        sprintf(msg, "Reading %d/10: %d C", i+1, tempInt);
         BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
         BSP_LCD_DisplayStringAt(0, 42, (uint8_t*)msg, CENTER_MODE);
         ThisThread::sleep_for(300ms);
@@ -91,15 +91,17 @@ int main() {
     BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
     int y = 24; const int dy = 14;
     for (int i = 0; i < 10; ++i) {
+        int tempInt = (int)roundf(temps[i]);
         char row[40];
-        sprintf(row, "T%-2d: %.2f C", i+1, temps[i]);
+        sprintf(row, "T%-2d: %d C", i+1, tempInt);
         BSP_LCD_DisplayStringAt(8, y, (uint8_t*)row, LEFT_MODE);
         y += dy;
     }
     float avg = sum / 10.f;
+    int avgInt = (int)roundf(avg);
     BSP_LCD_SetTextColor(LCD_COLOR_CYAN);
     char avgLine[40];
-    sprintf(avgLine, "AVG: %.2f C", avg);
+    sprintf(avgLine, "AVG: %d C", avgInt);
     BSP_LCD_DisplayStringAt(0, y + 6, (uint8_t*)avgLine, CENTER_MODE);
     while (true) { led = !led; ThisThread::sleep_for(600ms); }
 }
